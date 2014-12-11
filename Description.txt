@@ -1,0 +1,4 @@
+TheUserProject has Users, which can be registered or logged in
+Each user has it's name, password, favorite figure and favorite song
+The figure can be displayed by clicking special button
+The song can be played using buttons
