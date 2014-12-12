@@ -21,12 +21,12 @@ namespace TheUserProject
 		AddMessage(window, WM_NOTIFY, this, To_funcpointer(&SongComboBox::OnNotification));
 	}
 
-	void SongComboBox::Fill(SongManager music)
+	void SongComboBox::Fill(SongManager *music)
 	{
 		ComboBox_ResetContent(window);
-		for (int i = 0; i < music.GetSongsCount(); i++)
+		for (int i = 0; i < music->GetSongsCount(); i++)
 		{
-			ComboBox_AddString(window, music.GetSong(i));
+			ComboBox_AddString(window, music->GetSong(i));
 		}
 		ComboBox_SetCurSel(window, 0);
 	}

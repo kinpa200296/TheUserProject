@@ -10,6 +10,7 @@
 #include "SongManager.h"
 
 #define MAX_USER_COUNT 1000
+#define MIN_PASSWORD_LENGTH 4
 
 #define ID_LOGIN 8801
 #define ID_REGISTER 8802

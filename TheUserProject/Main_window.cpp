@@ -9,11 +9,15 @@ namespace TheUserProject
 			(WS_OVERLAPPEDWINDOW ^ WS_MAXIMIZEBOX ^ WS_THICKFRAME) | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS )
 	{
 		_userManager = new UserManager(MAX_USER_COUNT);
+		_userManager->LoadFromFile("Data\\Users.dat");
+		_music = new SongManager();
+		_paintFigure = 0;
 	}
 
 	Main_window::~Main_window()
 	{
 		_userManager->~UserManager();
+		_music->~SongManager();
 		_songComboBox->~SongComboBox();
 		_figureComboBox->~FigureComboBox();
 		_login->~Button();
@@ -123,6 +127,33 @@ namespace TheUserProject
 		{
 		case ID_EXIT:
 			return OnClose(wParam, lParam);
+		case ID_LOGIN:
+			OnLogin();
+			break;
+		case ID_REGISTER:
+			OnRegister();
+			break;
+		case ID_LOGOUT:
+			OnLogout();
+			break;
+		case ID_LOGIN_BUTTON:
+			if (VerifyLogin())
+			{
+				OnLoggedIn();
+			}
+			break;
+		case ID_REGISTER_BUTTON:
+			if (VerifyRegister())
+			{
+				OnRegistered();
+			}
+			break;
+		case ID_DRAW_FIGURE:
+			OnDrawFigure();
+			break;
+		case ID_PLAY_SONG:
+			OnPlaySong();
+			break;
 		default:
 			break;
 		}
@@ -152,5 +183,185 @@ namespace TheUserProject
 		ShowWindow(_playSongText->window, SW_HIDE);
 		ShowWindow(_drawFigure->window, SW_HIDE);
 		ShowWindow(_drawFigureText->window, SW_HIDE);
+	}
+
+	void Main_window::OnLogin()
+	{
+		HideAllWindows();
+		ShowWindow(_loginButton->window, SW_SHOW);
+		ShowWindow(_loginPasswordEdit->window, SW_SHOW);
+		ShowWindow(_loginPasswordText->window, SW_SHOW);
+		ShowWindow(_loginUsernameEdit->window, SW_SHOW);
+		ShowWindow(_loginUsernameText->window, SW_SHOW);
+		_loginUsernameEdit->Clear();
+		_loginPasswordEdit->Clear();
+	}
+
+	void Main_window::OnRegister()
+	{
+		HideAllWindows();
+		ShowWindow(_registerButton->window, SW_SHOW);
+		ShowWindow(_registerPasswordConfirmEdit->window, SW_SHOW);
+		ShowWindow(_registerPasswordConfirmText->window, SW_SHOW);
+		ShowWindow(_registerPasswordEdit->window, SW_SHOW);
+		ShowWindow(_registerPasswordText->window, SW_SHOW);
+		ShowWindow(_registerUsernameEdit->window, SW_SHOW);
+		ShowWindow(_registerUsernameText->window, SW_SHOW);
+		ShowWindow(_songSelectionText->window, SW_SHOW);
+		ShowWindow(_figureSelectionText->window, SW_SHOW);
+		ShowWindow(_songComboBox->window, SW_SHOW);
+		ShowWindow(_figureComboBox->window, SW_SHOW);
+		_registerUsernameEdit->Clear();
+		_registerPasswordEdit->Clear();
+		_registerPasswordConfirmEdit->Clear();
+	}
+
+	bool Main_window::VerifyLogin()
+	{
+		if (_loginUsernameEdit->GetTextLength() == 0 || _loginUsernameEdit->GetTextLength() >= STRLENGTH)
+		{
+			MessageBoxW(window, L"Invalid Username!", L"Error", MB_OK);
+			return false;
+		}
+		User user;
+		WCHAR buffer[STRLENGTH];
+		_loginUsernameEdit->GetText(buffer, STRLENGTH);
+		if (!_userManager->GetUser(buffer, user))
+		{
+			MessageBoxW(window, L"Invalid Username!", L"Error", MB_OK);
+			return false;
+		}
+		if (_loginPasswordEdit->GetTextLength() < MIN_PASSWORD_LENGTH || _loginPasswordEdit->GetTextLength() >= STRLENGTH)
+		{
+			MessageBoxW(window, L"Invalid Password!", L"Error", MB_OK);
+			return false;
+		}
+		_loginPasswordEdit->GetText(buffer, STRLENGTH);
+		if (lstrcmpW(buffer, user.GetPassword()))
+		{
+			MessageBoxW(window, L"Invalid Password!", L"Error", MB_OK);
+			return false;
+		}
+		return true;
+	}
+
+	bool Main_window::VerifyRegister()
+	{
+		WCHAR buffer[STRLENGTH], buffer2[STRLENGTH];
+		if (_registerUsernameEdit->GetTextLength() == 0)
+		{
+			MessageBoxW(window, L"Username cannot be empty!", L"Error", MB_OK);
+			return false;
+		}
+		if (_registerUsernameEdit->GetTextLength() >= STRLENGTH)
+		{
+			MessageBoxW(window, L"Username too long!", L"Error", MB_OK);
+			return false;
+		}
+		_registerUsernameEdit->GetText(buffer, STRLENGTH);
+		if (_userManager->GetUser(buffer, User()))
+		{
+			MessageBoxW(window, L"Username already taken!", L"Error", MB_OK);
+			return false;
+		}
+		if (_registerPasswordEdit->GetTextLength() <= MIN_PASSWORD_LENGTH)
+		{
+			MessageBoxW(window, L"Password too short!", L"Error", MB_OK);
+			return false;
+		}
+		if (_registerPasswordEdit->GetTextLength() >= STRLENGTH)
+		{
+			MessageBoxW(window, L"Password too long!", L"Error", MB_OK);
+			return false;
+		}
+		_registerPasswordEdit->GetText(buffer, STRLENGTH);
+		if (_registerPasswordConfirmEdit->GetTextLength() <= MIN_PASSWORD_LENGTH)
+		{
+			MessageBoxW(window, L"Password confirmation too short!", L"Error", MB_OK);
+			return false;
+		}
+		if (_registerPasswordConfirmEdit->GetTextLength() >= STRLENGTH)
+		{
+			MessageBoxW(window, L"Password confirmation too long!", L"Error", MB_OK);
+			return false;
+		}
+		_registerPasswordConfirmEdit->GetText(buffer2, STRLENGTH);
+		if (lstrcmpW(buffer, buffer2))
+		{
+			MessageBoxW(window, L"Passwords do not match!", L"Error", MB_OK);
+			return false;
+		}
+		return true;
+	}
+
+	void Main_window::OnLogout()
+	{
+		HideAllWindows();
+		ShowWindow(_login->window, SW_SHOW);
+		ShowWindow(_register->window, SW_SHOW);
+		WCHAR buffer[MAXSTRING];
+		swprintf_s(buffer, MAXSTRING, L"stop %ws", _currentUser.GetFavoriteSong());
+		mciSendStringW(buffer, NULL, 0, NULL);
+		swprintf_s(buffer, MAXSTRING, L"seek %ws to 0", _currentUser.GetFavoriteSong());
+		mciSendStringW(buffer, NULL, 0, NULL);
+		_currentUser = User();
+		_paintFigure = false;
+		if (_blank != NULL)
+		{
+			_blank->~DrawingWindow();
+		}
+		_blank = NULL;
+		_welcome->SetText(L"Welcome, Guest. Please Log in or Register.");
+	}
+
+	void Main_window::OnLoggedIn()
+	{
+		HideAllWindows();
+		ShowWindow(_login->window, SW_HIDE);
+		ShowWindow(_register->window, SW_HIDE);
+		ShowWindow(_logout->window, SW_SHOW);
+		WCHAR buffer[MAXSTRING];
+		_loginUsernameEdit->GetText(buffer, STRLENGTH);
+		_userManager->GetUser(buffer, _currentUser);
+		swprintf_s(buffer, MAXSTRING, L"Welcome, %ws.", _currentUser.GetName());
+		_welcome->SetText(buffer);
+		swprintf_s(buffer, MAXSTRING, L"Your favourite song is %ws. Do you want me to play it?", _currentUser.GetFavoriteSong());
+		_playSongText->SetText(buffer);
+		swprintf_s(buffer, MAXSTRING, L"Your favourite figure is %ws. Do you want me to draw it?", _currentUser.GetFavoriteFigure());
+		_drawFigureText->SetText(buffer);
+		ShowWindow(_playSong->window, SW_SHOW);
+		ShowWindow(_playSongText->window, SW_SHOW);
+		ShowWindow(_drawFigure->window, SW_SHOW);
+		ShowWindow(_drawFigureText->window, SW_SHOW);
+	}
+
+	void Main_window::OnRegistered()
+	{
+		HideAllWindows();
+		WCHAR buffer[4][STRLENGTH];
+		_registerUsernameEdit->GetText(buffer[0], STRLENGTH);
+		_registerPasswordEdit->GetText(buffer[1], STRLENGTH);
+		_songComboBox->GetCurrentSelectedText(buffer[2], STRLENGTH);
+		_figureComboBox->GetCurrentSelectedText(buffer[3], STRLENGTH);
+		User user(buffer[0], buffer[1], buffer[3], buffer[2]);
+		_userManager->AddUser(user);
+		_userManager->SaveToFile("Data\\Users.dat");
+		MessageBoxW(window, L"New user successfully added! You can now login.", L"Success", MB_OK);
+	}
+
+	void Main_window::OnPlaySong()
+	{
+		WCHAR buffer[MAXSTRING];
+		swprintf_s(buffer, MAXSTRING, L"seek %ws to 0", _currentUser.GetFavoriteSong());
+		int b = mciSendStringW(buffer, NULL, 0, NULL);
+		swprintf_s(buffer, MAXSTRING, L"play %ws", _currentUser.GetFavoriteSong());
+		mciSendStringW(buffer, NULL, 0, NULL);
+	}
+
+	void Main_window::OnDrawFigure()
+	{
+		_paintFigure = true;
+		_blank = new DrawingWindow(app_inst, window, 250, 50, 100, 100, _currentUser);
+		_blank->Start();
 	}
 }

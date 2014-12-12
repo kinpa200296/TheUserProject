@@ -34,4 +34,9 @@ namespace TheUserProject
 	{
 		return Edit_GetTextLength(window);
 	}
+
+	void Edit::Clear()
+	{
+		Edit_SetText(window, L"");
+	}
 }

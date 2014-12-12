@@ -6,6 +6,7 @@
 #include "Button.h"
 #include "StaticText.h"
 #include "Edit.h"
+#include "DrawingWindow.h"
 
 namespace TheUserProject
 {
@@ -27,6 +28,15 @@ namespace TheUserProject
 		LRESULT OnCommand(WPARAM, LPARAM);
 
 		void HideAllWindows();
+		void OnLogin();
+		void OnRegister();
+		bool VerifyLogin();
+		bool VerifyRegister();
+		void OnLogout();
+		void OnLoggedIn();
+		void OnRegistered();
+		void OnDrawFigure();
+		void OnPlaySong();
 
 	private:
 
@@ -37,8 +47,10 @@ namespace TheUserProject
 			*_registerPasswordConfirmText, *_songSelectionText, *_figureSelectionText, *_playSongText, *_drawFigureText;
 		Edit *_loginUsernameEdit, *_loginPasswordEdit, *_registerUsernameEdit, *_registerPasswordEdit, 
 			*_registerPasswordConfirmEdit;
-		SongManager _music;
+		DrawingWindow *_blank;
+		SongManager *_music;
 		UserManager *_userManager;
 		User _currentUser;
+		bool _paintFigure;
 	};
 }

@@ -54,6 +54,16 @@ namespace UserCore
 		return _password;
 	}
 
+	const WCHAR* User::GetFavoriteFigure()
+	{
+		return _favoriteFigure;
+	}
+
+	const WCHAR* User::GetFavoriteSong()
+	{
+		return _favoriteSong;
+	}
+
 	void User::WriteToFile(FILE *file)
 	{
 		fwrite(_name, STRLENGTH*sizeof(WCHAR), 1, file);

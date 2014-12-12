@@ -13,6 +13,7 @@ namespace TheUserProject
 		void SetText(WCHAR *text);
 		void GetText(WCHAR *destination, int size);
 		int GetTextLength();
+		void Clear();
 
 	private:
 	};

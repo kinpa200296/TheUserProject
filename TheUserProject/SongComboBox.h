@@ -8,7 +8,7 @@ namespace TheUserProject
 	{
 	public:
 		void Start();
-		void Fill(SongManager music);
+		void Fill(SongManager *music);
 		void GetCurrentSelectedText(WCHAR *destination, int size);
 		SongComboBox(HINSTANCE hinst, HWND parent, int _x, int _y, int _width, int _height, int id);
 		~SongComboBox();
