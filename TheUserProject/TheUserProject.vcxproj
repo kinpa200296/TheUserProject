@@ -83,7 +83,6 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Button.cpp" />
-    <ClCompile Include="DrawingWindow.cpp" />
     <ClCompile Include="Edit.cpp" />
     <ClCompile Include="FigureComboBox.cpp" />
     <ClCompile Include="SongComboBox.cpp" />
@@ -94,7 +93,6 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Button.h" />
-    <ClInclude Include="DrawingWindow.h" />
     <ClInclude Include="Edit.h" />
     <ClInclude Include="FigureComboBox.h" />
     <ClInclude Include="SongComboBox.h" />

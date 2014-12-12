@@ -107,6 +107,7 @@ namespace TheUserProject
 
 		AddMessage(window, WM_CLOSE, this, To_funcpointer(&Main_window::OnClose));
 		AddMessage(window, WM_COMMAND, this, To_funcpointer(&Main_window::OnCommand));
+		AddMessage(window, WM_PAINT, this, To_funcpointer(&Main_window::OnPaint));
 	}
 
 	void Main_window::Show(int nCmdShow)
@@ -157,6 +158,55 @@ namespace TheUserProject
 		default:
 			break;
 		}
+		return 0;
+	}
+
+	LRESULT Main_window::OnPaint(WPARAM wParam, LPARAM lParam)
+	{
+		PAINTSTRUCT ps;
+		BeginPaint(window, &ps);
+		if (_paintFigure)
+		{
+			if (!lstrcmpW(_currentUser.GetFavoriteFigure(), L"Square"))
+			{
+				SelectObject(ps.hdc, GetStockObject(DC_PEN));
+				SetDCPenColor(ps.hdc, RGB(240,240,240));
+				LineTo(ps.hdc, 260, 40);
+				SetDCPenColor(ps.hdc, RGB(255, 255, 255));
+				Rectangle(ps.hdc, 250, 30, 350, 130);
+				SetDCPenColor(ps.hdc, RGB(255, 0, 0));
+				LineTo(ps.hdc, 260, 120);
+				LineTo(ps.hdc, 340, 120);
+				LineTo(ps.hdc, 340, 40);
+				LineTo(ps.hdc, 260, 40);
+			}
+			if (!lstrcmpW(_currentUser.GetFavoriteFigure(), L"Circle"))
+			{
+				SelectObject(ps.hdc, GetStockObject(DC_PEN));
+				SetDCPenColor(ps.hdc, RGB(240,240,240));
+				LineTo(ps.hdc, 260, 80);
+				SetDCPenColor(ps.hdc, RGB(255, 255, 255));
+				Rectangle(ps.hdc, 250, 30, 350, 130);
+				SetDCPenColor(ps.hdc, RGB(0, 255, 0));
+				for (int i = 260; i <= 340; i++)
+					LineTo(ps.hdc, i, 80-(int)sqrt(1600 - (i - 300)*(i - 300)));
+				for (int i = 340; i >= 260; i--)
+					LineTo(ps.hdc, i, 80+(int)sqrt(1600 - (i - 300)*(i - 300)));
+			}
+			if (!lstrcmpW(_currentUser.GetFavoriteFigure(), L"Triangle"))
+			{
+				SelectObject(ps.hdc, GetStockObject(DC_PEN));
+				SetDCPenColor(ps.hdc, RGB(240,240,240));
+				LineTo(ps.hdc, 300, 40);
+				SetDCPenColor(ps.hdc, RGB(255, 255, 255));
+				Rectangle(ps.hdc, 250, 30, 350, 130);
+				SetDCPenColor(ps.hdc, RGB(0, 0, 255));
+				LineTo(ps.hdc, 260, 120);
+				LineTo(ps.hdc, 340, 120);
+				LineTo(ps.hdc, 300, 40);
+			}
+		}
+		EndPaint(window, &ps);
 		return 0;
 	}
 
@@ -306,11 +356,7 @@ namespace TheUserProject
 		mciSendStringW(buffer, NULL, 0, NULL);
 		_currentUser = User();
 		_paintFigure = false;
-		if (_blank != NULL)
-		{
-			_blank->~DrawingWindow();
-		}
-		_blank = NULL;
+		InvalidateRect(window, NULL, true);
 		_welcome->SetText(L"Welcome, Guest. Please Log in or Register.");
 	}
 
@@ -361,7 +407,6 @@ namespace TheUserProject
 	void Main_window::OnDrawFigure()
 	{
 		_paintFigure = true;
-		_blank = new DrawingWindow(app_inst, window, 250, 50, 100, 100, _currentUser);
-		_blank->Start();
+		InvalidateRect(window, NULL, true);
 	}
 }
